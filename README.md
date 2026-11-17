@@ -99,6 +99,9 @@ icons/                   icônes PWA (192, 512, maskable)
 - Conversations : IndexedDB `llm-pocket`, magasin `conversations`.
 - Modèles : OPFS, dossier `models/` (415 Mo).
 - Aucune requête réseau après la préparation initiale, sauf la dictée si elle est active.
+- La dictée ne se lance ni au démarrage à froid ni hors ligne : la reconnaissance du
+  navigateur passe par un service en ligne. Le bouton micro reste disponible pour la
+  demander explicitement.
 
 ## Limites connues
 
@@ -109,7 +112,24 @@ icons/                   icônes PWA (192, 512, maskable)
 - `storage.persist()` peut être refusé par Chrome : le modèle reste alors évictable.
 - Navigateurs recommandés : Chrome / Edge (SharedArrayBuffer, OPFS, WebAssembly threads).
 
+## Résultats mesurés
+
+Tablette Ulefone Tab A8 (Android 12, 4 Go de RAM, 8 cœurs, Chrome 157), application
+installée depuis GitHub Pages :
+
+| Étape | Mesure |
+| --- | --- |
+| Téléchargement du modèle depuis Hugging Face | 415 Mo en ~386 s |
+| Chargement du moteur (CPU, 4 fils) | prêt à ~407 s après le clic |
+| Première réponse | ~30 à 40 s |
+| Démarrage à froid **hors ligne**, après redémarrage de la tablette | application ouverte en mode `standalone`, moteur prêt, aucune requête réseau |
+| Réponse hors ligne | « Bonjour ! 😊 » en ~55 s |
+| Animation de l'avatar | 48 à 56 images/s (chute à ~17 pendant la génération) |
+
+`navigator.storage.persisted()` reste `false` sur cette tablette : le modèle peut donc
+être évincé par Chrome si le stockage de l'appareil se remplit.
+
 ## Mise à jour
 
 Après modification d'un fichier précaché, incrémenter `CACHE` dans `sw.js`
-(`llm-pocket-v11` → `llm-pocket-v12`), sinon l'ancienne version reste servie hors ligne.
+(`llm-pocket-v12` → `llm-pocket-v13`), sinon l'ancienne version reste servie hors ligne.

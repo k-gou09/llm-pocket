@@ -3,7 +3,7 @@
 // racine (serveur de dev) comme dans un sous-dossier (GitHub Pages /llm-pocket/).
 // Version du cache : a augmenter quand les fichiers de l'app changent, sinon le
 // navigateur peut servir une version ancienne des modules.
-const CACHE = 'llm-pocket-v11';
+const CACHE = 'llm-pocket-v12';
 
 const PRECACHE = [
   './',

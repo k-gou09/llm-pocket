@@ -222,7 +222,7 @@ function setupInstall() {
 
 // ---------- modes ----------
 
-function setMode(mode) {
+function setMode(mode, options = {}) {
   const next = mode === 'avatar' ? 'avatar' : 'chat';
   els.app.dataset.mode = next;
   els.chat.hidden = next !== 'chat';
@@ -231,7 +231,7 @@ function setMode(mode) {
   els.btnModeAvatar.classList.toggle('is-active', next === 'avatar');
   els.btnModeChat.setAttribute('aria-selected', next === 'chat' ? 'true' : 'false');
   els.btnModeAvatar.setAttribute('aria-selected', next === 'avatar' ? 'true' : 'false');
-  screen.applyMode(next);
+  screen.applyMode(next, options);
   if (next === 'chat') robot.reset();
   if (settings.mode !== next) {
     // save declenche onChange : on evite la boucle en comparant deja ici.
@@ -253,8 +253,8 @@ function renderSettings() {
 }
 
 function bindMode() {
-  els.btnModeChat.addEventListener('click', () => setMode('chat'));
-  els.btnModeAvatar.addEventListener('click', () => setMode('avatar'));
+  els.btnModeChat.addEventListener('click', () => setMode('chat', { fromUser: true }));
+  els.btnModeAvatar.addEventListener('click', () => setMode('avatar', { fromUser: true }));
 
   els.btnSettingTts.addEventListener('click', () => {
     save({ tts: !settings.tts });

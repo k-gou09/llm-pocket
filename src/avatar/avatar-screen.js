@@ -98,6 +98,13 @@ export class AvatarScreen {
       this.avatar.setPaused(document.hidden);
     });
 
+    // Perte du reseau pendant la dictee : on ferme le micro au lieu de laisser
+    // un badge "en ligne" alors que la reconnaissance ne peut plus repondre.
+    this.onOffline = () => {
+      if (this.dictation.state === 'listening') this.dictation.stop();
+    };
+    globalThis.addEventListener?.('offline', this.onOffline);
+
     this.debug = new DebugOverlay({
       getStats: () => this.stats(),
       host: els.host,
@@ -231,6 +238,13 @@ export class AvatarScreen {
       this.bus.emit('notice', 'Reconnaissance vocale indisponible dans ce navigateur.');
       return;
     }
+    // La reconnaissance du navigateur passe par un service en ligne : hors
+    // ligne, on n'ouvre pas le micro pour rien.
+    if (!navigator.onLine) {
+      this.bus.emit('notice', 'Dictee indisponible hors ligne : la reconnaissance passe par le reseau.');
+      this.applyState('idle');
+      return;
+    }
     await this.dictation.start();
   }
 
@@ -240,7 +254,10 @@ export class AvatarScreen {
 
   // ---------- mode ----------
 
-  applyMode(mode) {
+  // options.fromUser=true : le mode vient d'un clic dans l'application. Au
+  // demarrage a froid, on ne lance pas la dictee : ouvrir le micro sans geste
+  // volontaire surprendrait, et le reseau peut manquer.
+  applyMode(mode, options = {}) {
     this.mode = mode === 'avatar' ? 'avatar' : 'chat';
     this.els.host.classList.toggle('avatar-mode', this.mode === 'avatar');
     if (this.mode !== 'avatar') this.stopDictation();
@@ -253,8 +270,11 @@ export class AvatarScreen {
       // Mesure sur Android : sans geste utilisateur, le navigateur refuse l'acces au
       // micro. On ne lance donc la dictee que pendant un clic ou une touche ; sinon on
       // attend le bouton micro, sans pretendre que la reconnaissance a echoue.
-      if (globalThis.navigator?.userActivation?.isActive) this.startDictation();
-      else this.applyState('idle');
+      if (options.fromUser && navigator.onLine && globalThis.navigator?.userActivation?.isActive) {
+        this.startDictation();
+      } else {
+        this.applyState('idle');
+      }
     } else if (this.mode === 'avatar') this.applyState('idle');
   }
 
@@ -328,6 +348,7 @@ export class AvatarScreen {
 
   destroy() {
     cancelAnimationFrame(this.frameTimer);
+    globalThis.removeEventListener?.('offline', this.onOffline);
     this.dictation.destroy();
     this.speaker.stop('destroy');
     this.player.stop();
