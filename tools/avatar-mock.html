@@ -1,0 +1,1036 @@
+﻿<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#070b10" />
+<meta name="color-scheme" content="dark" />
+<title>Pocket Live - maquette Avatar</title>
+<link rel="stylesheet" href="/src/avatar/avatar.css" />
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(120% 70% at 12% 0%, rgba(91, 140, 255, 0.12), transparent 55%),
+      radial-gradient(100% 60% at 90% 100%, rgba(110, 231, 183, 0.09), transparent 60%),
+      #080c11;
+    color: #e8eef4;
+    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button { font: inherit; color: inherit; }
+
+  .mock {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: minmax(340px, 400px) minmax(320px, 390px);
+    gap: 34px;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  /* ---------- Cadre telephone ---------- */
+  .device {
+    position: relative;
+    width: 100%;
+    height: min(862px, calc(100vh - 40px));
+    border: 9px solid #1b232d;
+    border-radius: 46px;
+    background: #070b10;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(58, 77, 99, 0.5);
+    overflow: hidden;
+  }
+  .device-screen {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background: #0e1318;
+  }
+
+  .mock-topbar {
+    position: relative;
+    z-index: 5;
+    display: grid;
+    grid-template-columns: 44px 1fr 44px;
+    align-items: center;
+    gap: 8px;
+    padding: calc(8px + env(safe-area-inset-top, 0px)) 10px 8px;
+    border-bottom: 1px solid rgba(37, 49, 64, 0.8);
+    background: rgba(14, 19, 24, 0.92);
+    backdrop-filter: blur(14px);
+  }
+
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 14px;
+    background: transparent;
+    color: #cfd9e4;
+    cursor: pointer;
+  }
+  .icon-btn:hover { background: #1b2430; }
+  .icon-btn:focus-visible { outline: 2px solid #5b8cff; outline-offset: 1px; }
+  .icon-btn svg { width: 21px; height: 21px; }
+
+  .mode-switch {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    justify-self: center;
+    width: min(100%, 208px);
+    padding: 4px;
+    border: 1px solid #253140;
+    border-radius: 999px;
+    background: #151c25;
+  }
+  .mode-switch .slider {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    border-radius: 999px;
+    background: linear-gradient(150deg, rgba(110, 231, 183, 0.22), rgba(91, 140, 255, 0.24));
+    border: 1px solid rgba(110, 231, 183, 0.35);
+    transition: transform 0.28s cubic-bezier(0.3, 0.8, 0.3, 1);
+  }
+  .mode-switch[data-mode="avatar"] .slider { transform: translateX(100%); }
+  .mode-switch button {
+    position: relative;
+    z-index: 1;
+    min-height: 44px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: #93a1b0;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+  }
+  .mode-switch button[aria-selected="true"] { color: #eafff7; }
+
+  .views { position: relative; flex: 1 1 auto; min-height: 0; }
+  .view { position: absolute; inset: 0; display: flex; flex-direction: column; }
+  .view[hidden] { display: none; }
+
+  /* ---------- Vue chat (rappel) ---------- */
+  .view-chat { overflow: hidden; }
+  .chat-scroll {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 16px 12px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .bubble {
+    max-width: 84%;
+    padding: 10px 13px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.45;
+    animation: bubbleIn 0.24s ease-out;
+  }
+  .bubble.user { align-self: flex-end; background: linear-gradient(135deg, #5b8cff, #4468d8); color: #fff; border-bottom-right-radius: 6px; }
+  .bubble.bot { align-self: flex-start; background: #1b2430; border: 1px solid #253140; border-bottom-left-radius: 6px; }
+  .bubble small { display: block; margin-top: 4px; color: #93a1b0; font-size: 11px; }
+
+  .composer {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    padding: 8px 10px calc(10px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid #253140;
+    background: #0e1318;
+  }
+  .composer textarea {
+    flex: 1 1 auto;
+    min-height: 44px;
+    max-height: 110px;
+    padding: 11px 13px;
+    resize: none;
+    border: 1px solid #253140;
+    border-radius: 16px;
+    background: #151c25;
+    color: #e8eef4;
+    font: inherit;
+    font-size: 14px;
+  }
+  .composer textarea:focus { outline: none; border-color: #5b8cff; }
+  .send {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #5b8cff, #4468d8);
+    color: #fff;
+    cursor: pointer;
+  }
+  .send svg { width: 20px; height: 20px; }
+
+  /* ---------- Vue avatar ---------- */
+  .view-avatar { padding-bottom: 0; }
+  .view-avatar .avatar-screen { flex: 1 1 auto; min-height: 0; }
+
+  .mock-flag {
+    position: absolute;
+    top: calc(8px + env(safe-area-inset-top, 0px));
+    right: 58px;
+    z-index: 4;
+    padding: 3px 8px;
+    border: 1px dashed rgba(147, 161, 176, 0.4);
+    border-radius: 999px;
+    color: #7f8d9c;
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* ---------- Panneau de demonstration ---------- */
+  .panel {
+    align-self: center;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    padding: 20px 18px 26px;
+    border: 1px solid rgba(37, 49, 64, 0.9);
+    border-radius: 22px;
+    background: rgba(16, 22, 29, 0.94);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  }
+  .panel::-webkit-scrollbar { width: 8px; }
+  .panel::-webkit-scrollbar-thumb { background: #253140; border-radius: 8px; }
+
+  .panel-head h1 {
+    margin: 0;
+    font-size: 19px;
+    letter-spacing: -0.01em;
+  }
+  .panel-head p {
+    margin: 3px 0 16px;
+    color: #93a1b0;
+    font-size: 12.5px;
+  }
+
+  .panel section { padding: 14px 0; border-top: 1px solid rgba(37, 49, 64, 0.75); }
+  .panel section:first-of-type { border-top: 0; padding-top: 0; }
+  .panel h2 {
+    margin: 0 0 9px;
+    color: #93a1b0;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+
+  .pbtn {
+    min-height: 44px;
+    /* Cible tactile : la largeur minimale compte autant que la hauteur. */
+    min-width: 44px;
+    padding: 8px 10px;
+    border: 1px solid #253140;
+    border-radius: 12px;
+    background: #151c25;
+    color: #cfd9e4;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.18s, background 0.18s, color 0.18s;
+  }
+  .pbtn:hover { border-color: #3a4d63; background: #1b2430; }
+  .pbtn:focus-visible { outline: 2px solid #5b8cff; outline-offset: 1px; }
+  .pbtn[aria-pressed="true"] {
+    border-color: rgba(110, 231, 183, 0.5);
+    background: rgba(110, 231, 183, 0.1);
+    color: #a7f3d6;
+  }
+  .pbtn.danger[aria-pressed="true"] {
+    border-color: rgba(255, 123, 123, 0.55);
+    background: rgba(255, 123, 123, 0.1);
+    color: #ffb3b3;
+  }
+  .pbtn.wide { width: 100%; min-height: 44px; }
+  .pbtn.primary {
+    border-color: rgba(110, 231, 183, 0.45);
+    background: linear-gradient(150deg, rgba(110, 231, 183, 0.2), rgba(21, 28, 37, 0.9));
+    color: #b9fbe4;
+  }
+
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 9px; }
+
+  .slider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    color: #93a1b0;
+    font-size: 12px;
+  }
+  .slider input {
+    flex: 1 1 auto;
+    height: 44px;
+    accent-color: #6ee7b7;
+  }
+  .slider output {
+    min-width: 34px;
+    text-align: right;
+    color: #cfd9e4;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .panel textarea {
+    width: 100%;
+    min-height: 68px;
+    padding: 10px 11px;
+    resize: vertical;
+    border: 1px solid #253140;
+    border-radius: 12px;
+    background: #0e1318;
+    color: #e8eef4;
+    font: inherit;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .panel textarea:focus { outline: none; border-color: #5b8cff; }
+
+  .debug dl {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: 3px 8px;
+    margin: 0;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+  .debug dt { color: #7f8d9c; }
+  .debug dd { margin: 0; color: #cfd9e4; }
+  .debug .note {
+    margin: 10px 0 0;
+    padding: 9px 10px;
+    border: 1px dashed rgba(147, 161, 176, 0.28);
+    border-radius: 10px;
+    color: #93a1b0;
+    font-size: 11.5px;
+    line-height: 1.45;
+  }
+
+  .panel-toggle { display: none; }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    z-index: 90;
+    transform: translate(-50%, 16px);
+    padding: 10px 16px;
+    border: 1px solid #253140;
+    border-radius: 999px;
+    background: #1b2430;
+    color: #e8eef4;
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  @keyframes bubbleIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---------- Mobile : le telephone prend l'ecran ---------- */
+  @media (max-width: 900px) {
+    .mock {
+      display: block;
+      min-height: 100dvh;
+      padding: 0;
+    }
+    .device {
+      width: 100%;
+      height: 100dvh;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+    .panel {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 60;
+      max-height: 82dvh;
+      border-radius: 22px 22px 0 0;
+      background: rgba(14, 20, 27, 0.97);
+      backdrop-filter: blur(18px);
+      overscroll-behavior: contain;
+      transform: translateY(102%);
+      transition: transform 0.28s cubic-bezier(0.3, 0.8, 0.3, 1);
+    }
+    .panel.open { transform: translateY(0); }
+    .panel-toggle {
+      position: fixed;
+      right: 12px;
+      top: calc(70px + env(safe-area-inset-top, 0px));
+      bottom: auto;
+      z-index: 61;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 44px;
+      padding: 0 13px;
+      border: 1px solid rgba(110, 231, 183, 0.4);
+      border-radius: 999px;
+      background: rgba(21, 28, 37, 0.9);
+      color: #b9fbe4;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(10px);
+      cursor: pointer;
+    }
+    .panel-toggle svg { width: 17px; height: 17px; }
+    .panel-scrim {
+      position: fixed;
+      inset: 0;
+      z-index: 55;
+      background: rgba(4, 7, 10, 0.6);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .panel-scrim.show { opacity: 1; pointer-events: auto; }
+    .mock-flag { right: 50px; }
+    .avatar-hint { display: none; }
+  }
+
+  @media (max-width: 380px) {
+    .avatar-hud { padding-left: 12px; padding-right: 12px; }
+    .avatar-controls { gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="mock">
+  <div class="device">
+    <div class="device-screen">
+
+      <header class="mock-topbar">
+        <button class="icon-btn" aria-label="Conversations">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+        </button>
+
+        <div class="mode-switch" id="modeSwitch" role="tablist" aria-label="Mode d'affichage" data-mode="avatar">
+          <span class="slider" aria-hidden="true"></span>
+          <button role="tab" data-mode="chat" aria-selected="false" aria-controls="chatView">Chat</button>
+          <button role="tab" data-mode="avatar" aria-selected="true" aria-controls="avatarView">Avatar</button>
+        </div>
+
+        <button class="icon-btn" aria-label="Nouvelle conversation">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </header>
+
+      <div class="views">
+        <!-- Vue chat : continuite de l'historique -->
+        <section class="view view-chat" id="chatView" hidden aria-label="Mode chat">
+          <div class="chat-scroll" id="chatScroll">
+            <div class="bubble user">Explique-moi les trous noirs, simplement.</div>
+            <div class="bubble bot">Un trou noir, c'est une région où la gravité est si forte que même la lumière ne peut pas s'échapper. Imagine une étoile très massive qui s'effondre sur elle-même.</div>
+            <div class="bubble user">Et si j'appuie sur le robot ?</div>
+            <div class="bubble bot">Tu passes en mode Avatar : je te réponds à voix haute, avec les yeux et la bouche animés. L'historique reste le même.<small>Réponse de démonstration</small></div>
+          </div>
+          <form class="composer" id="chatForm">
+            <textarea id="chatInput" rows="1" placeholder="Message…" enterkeyhint="send" aria-label="Message"></textarea>
+            <button class="send" type="submit" aria-label="Envoyer">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2.8 20.4l18.2-7.9a.55.55 0 000-1L2.8 3.6a.6.6 0 00-.8.75L4 11l9.5 1L4 13l-2 6.65a.6.6 0 00.8.75z"/></svg>
+            </button>
+          </form>
+        </section>
+
+        <!-- Vue avatar : la maquette a valider -->
+        <section class="view view-avatar" id="avatarView" aria-label="Mode avatar">
+          <div class="avatar-screen" id="avatarScreen" data-state="idle">
+            <div class="avatar-scene">
+              <div class="avatar-veil" aria-hidden="true"></div>
+
+              <div class="avatar-stage-wrap">
+                <div id="avatarStage" class="avatar-stage" role="img" aria-label="Pocket, avatar animé"></div>
+              </div>
+
+              <div class="avatar-hud">
+                <div class="avatar-badges">
+                  <span class="avatar-status"><span class="dot" aria-hidden="true"></span><span id="statusText">Au repos</span></span>
+                  <span class="avatar-badge" id="voiceBadge"><span class="dot" aria-hidden="true"></span><span id="voiceText">voix</span></span>
+                  <span class="avatar-badge online" id="micBadge" hidden><span class="dot" aria-hidden="true"></span>micro en ligne</span>
+                </div>
+
+                <div class="avatar-caption muted" id="caption">Appuie sur Parler : je te réponds à voix haute.</div>
+
+                <div class="avatar-controls">
+                  <button class="avatar-btn" id="btnMic" aria-pressed="false" aria-label="Dicter (micro en ligne)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg>
+                  </button>
+                  <button class="avatar-btn primary" id="btnTalk" aria-label="Faire parler Pocket">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" id="iconPlay"><path d="M8 5.4v13.2a1 1 0 001.53.85l10.2-6.6a1 1 0 000-1.7L9.53 4.55A1 1 0 008 5.4z"/></svg>
+                  </button>
+                  <button class="avatar-btn danger" id="btnStop" aria-label="Arrêter la voix" disabled>
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6.5" y="6.5" width="11" height="11" rx="2.5"/></svg>
+                  </button>
+                </div>
+
+                <p class="avatar-hint" id="hint">Maquette : voix système, synchro estimée et recalée sur les repères du moteur.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <button class="panel-toggle" id="btnPanel" aria-expanded="false" aria-controls="panel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h6M14 17h6"/><circle cx="16" cy="7" r="2"/><circle cx="12" cy="17" r="2"/></svg>
+        Réglages démo
+      </button>
+      <div class="panel-scrim" id="scrim"></div>
+    </div>
+  </div>
+
+  <aside class="panel" id="panel" aria-label="Réglages de la maquette">
+    <div class="panel-head">
+      <h1>Pocket Live</h1>
+      <p>Maquette de validation du mode Avatar. Aucun modèle, aucun réseau : uniquement l'interface et la voix du navigateur.</p>
+    </div>
+
+    <section>
+      <h2>États</h2>
+      <div class="btn-grid" id="stateBtns"></div>
+    </section>
+
+    <section>
+      <h2>Expressions</h2>
+      <div class="chips" id="emoBtns"></div>
+    </section>
+
+    <section>
+      <h2>Bouche</h2>
+      <div class="chips" id="visemeBtns"></div>
+      <label class="slider" for="amp">Amplitude
+        <input id="amp" type="range" min="0" max="1" step="0.05" value="0.85" />
+        <output id="ampOut">0.85</output>
+      </label>
+      <button class="pbtn wide" id="btnPartition" style="margin-top: 8px;">Bouche seule, sans son</button>
+    </section>
+
+    <section>
+      <h2>Synchro TTS</h2>
+      <textarea id="ttsText" aria-label="Texte à lire">Bonjour, je suis Pocket. Je parle avec la voix du système, et ma bouche suit le rythme des mots. La synchronisation est estimée, puis recalée sur les repères du moteur vocal quand il en fournit.</textarea>
+      <label class="slider" for="rate">Débit
+        <input id="rate" type="range" min="0.7" max="1.4" step="0.05" value="1" />
+        <output id="rateOut">1.00</output>
+      </label>
+      <div class="row">
+        <button class="pbtn primary" id="btnSpeak">Parler</button>
+        <button class="pbtn" id="btnStress">Stress 8 s</button>
+      </div>
+    </section>
+
+    <section class="debug">
+      <h2>Diagnostic</h2>
+      <dl>
+        <dt>État</dt><dd id="dbgState">idle</dd>
+        <dt>Synchro</dt><dd id="dbgSync">idle</dd>
+        <dt>Visèmes</dt><dd id="dbgViseme">rest</dd>
+        <dt>Repères</dt><dd id="dbgBoundary">0</dd>
+        <dt>Durée</dt><dd id="dbgDuration">-</dd>
+        <dt>Voix</dt><dd id="dbgVoice">-</dd>
+        <dt>Locale</dt><dd id="dbgLocal">-</dd>
+        <dt>Images/s</dt><dd id="dbgFps">-</dd>
+      </dl>
+      <p class="note">Le navigateur n'expose aucun flux audio du TTS : la bouche ne peut pas suivre la vraie amplitude. On estime la partition par syllabes, puis on la recale à chaque repère « boundary ». Sans repère, elle reste une estimation honnête, jamais une fausse analyse du son.</p>
+    </section>
+  </aside>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script type="module">
+import { Avatar, AVATAR_STATES, AVATAR_EMOTIONS, AVATAR_VISEMES } from '../src/avatar/avatar.js';
+import { VisemePlayer, buildVisemeScript } from '../src/avatar/speech.js';
+import { Speaker } from '../src/voice/tts.js';
+
+const $ = (id) => document.getElementById(id);
+const screenEl = $('avatarScreen');
+const stageEl = $('avatarStage');
+const statusText = $('statusText');
+const caption = $('caption');
+const hint = $('hint');
+const voiceBadge = $('voiceBadge');
+const voiceText = $('voiceText');
+const micBadge = $('micBadge');
+const btnMic = $('btnMic');
+const btnTalk = $('btnTalk');
+const btnStop = $('btnStop');
+
+const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const avatar = new Avatar(stageEl, { reducedMotion: prefersReduced });
+
+const player = new VisemePlayer(avatar);
+const speaker = new Speaker(avatar, { rate: 1 });
+speaker.onStateChange = (state) => {
+  if (state === 'speaking') applyState('speaking');
+  else if (screenEl.dataset.state === 'speaking') applyState('idle');
+};
+
+const LABELS = {
+  idle: 'Au repos',
+  listening: 'À l\'écoute',
+  thinking: 'Réflexion',
+  speaking: 'Parole',
+  error: 'Erreur',
+};
+
+const DEMO_REPLY = {
+  short: 'Je suis Pocket. Je peux te répondre à voix haute, tout en gardant l\'historique du mode chat.',
+  long: 'La pluie tombe doucement sur la ville endormie, et les réverbères dessinent des flaques de lumière. Je marche sans bruit, en écoutant le ruissellement des gouttes sur les toits. Un chat traverse la rue, hésite, puis disparaît sous une porte cochère.',
+};
+
+let micOn = false;
+let boundaryCount = 0;
+let currentState = 'idle';
+const stateButtons = new Map();
+const emotionButtons = new Map();
+const visemeButtons = new Map();
+
+/* ---------- Etats ---------- */
+
+function applyState(state) {
+  if (!AVATAR_STATES.includes(state)) return;
+  currentState = state;
+  avatar.setState(state);
+  screenEl.dataset.state = state;
+  statusText.textContent = LABELS[state];
+  $('dbgState').textContent = state;
+
+  for (const [name, button] of stateButtons) {
+    button.setAttribute('aria-pressed', String(name === state));
+    if (name === state) button.classList.toggle('danger', state === 'error');
+  }
+
+  if (state !== 'speaking') {
+    player.stop();
+    btnStop.disabled = true;
+    btnTalk.setAttribute('aria-label', 'Faire parler Pocket');
+  } else {
+    btnStop.disabled = false;
+    btnTalk.setAttribute('aria-label', 'Arrêter la voix');
+  }
+
+  if (state !== 'listening' && micOn) setMic(false);
+  if (state === 'thinking') {
+    caption.classList.remove('muted');
+    caption.textContent = 'Je réfléchis…';
+  } else if (state === 'speaking' && !speaker.speaking) {
+    caption.classList.remove('muted');
+    caption.textContent = 'Je parle, la bouche suit la partition.';
+  } else if (state === 'listening') {
+    caption.classList.remove('muted');
+    caption.textContent = 'Je t\'écoute. (Démo : aucune capture micro.)';
+  }
+  if (state === 'error') caption.textContent = 'Oups, une erreur est survenue. Je reste disponible.';
+  $('dbgViseme').textContent = avatar.viseme;
+}
+
+function speakText() {
+  const text = $('ttsText').value.trim();
+  if (!text) return;
+  if (!speaker.supported) {
+    toast('La synthèse vocale n\'est pas disponible dans ce navigateur.');
+    return;
+  }
+  setMic(false);
+  player.stop();
+  speaker.stop('new', { silent: true });
+  applyState('thinking');
+  caption.classList.add('muted');
+  caption.textContent = 'Je prépare la voix…';
+  boundaryCount = 0;
+  $('dbgBoundary').textContent = '0';
+  $('dbgDuration').textContent = '-';
+  let startedAt = 0;
+
+  speaker.rate = Number($('rate').value) || 1;
+  setTimeout(() => {
+    if (currentState !== 'thinking') return;
+    speaker.speak(text, {
+      onStart: () => {
+        startedAt = performance.now();
+        caption.classList.remove('muted');
+      },
+      onSentence: (sentence) => {
+        caption.textContent = sentence;
+      },
+      onBoundary: () => {
+        boundaryCount += 1;
+        $('dbgBoundary').textContent = String(boundaryCount);
+      },
+      onEnd: ({ cancelled }) => {
+        if (!cancelled) {
+          const seconds = startedAt ? (performance.now() - startedAt) / 1000 : 0;
+          $('dbgDuration').textContent = seconds ? seconds.toFixed(1) + ' s' : '-';
+        }
+        if (cancelled) return;
+        applyState('idle');
+        avatar.setEmotion('happy', 2200);
+        caption.classList.remove('muted');
+        caption.textContent = 'Voilà. Appuie sur Parler pour recommencer.';
+      },
+    });
+  }, 620);
+}
+
+function stopAll() {
+  speaker.stop('user');
+  player.stop();
+  if (currentState === 'speaking' || currentState === 'thinking') applyState('idle');
+  caption.classList.remove('muted');
+  caption.textContent = 'Lecture arrêtée.';
+}
+
+/* ---------- Micro (simulation visuelle) ---------- */
+
+function setMic(on) {
+  micOn = on;
+  btnMic.classList.toggle('is-active', on);
+  btnMic.setAttribute('aria-pressed', String(on));
+  micBadge.hidden = !on;
+  if (on) {
+    player.stop();
+    speaker.stop('mic', { silent: true });
+    applyState('listening');
+    caption.classList.remove('muted');
+    caption.textContent = 'Maquette : ici aucun micro n\'est écoute. Dans l\'app, la dictée utilise la reconnaissance en ligne du navigateur, avec ce badge visible.';
+    hint.textContent = 'Aucune capture audio dans cette maquette.';
+  } else {
+    hint.textContent = 'Maquette : voix système, synchro estimée et recalée sur les repères du moteur.';
+    if (caption.textContent.startsWith('Micro simulé')) {
+      caption.textContent = 'Appuie sur Parler : je te réponds à voix haute.';
+    }
+    if (currentState === 'listening') applyState('idle');
+  }
+}
+
+btnMic.addEventListener('click', () => setMic(!micOn));
+
+/* ---------- Voix ---------- */
+
+function refreshVoiceBadge() {
+  speaker.refreshVoices();
+  const local = speaker.voiceIsLocal;
+  voiceBadge.className = 'avatar-badge ' + (speaker.voice ? (local ? 'live' : 'online') : '');
+  const label = speaker.voice ? speaker.voice.name : 'voix par défaut';
+  voiceText.textContent = local ? 'voix locale' : 'voix système';
+  voiceBadge.title = label;
+  $('dbgVoice').textContent = label;
+  $('dbgLocal').textContent = speaker.voice ? (local ? 'oui' : 'non') : 'inconnue';
+}
+refreshVoiceBadge();
+if (window.speechSynthesis) {
+  window.speechSynthesis.addEventListener('voiceschanged', refreshVoiceBadge);
+}
+
+/* ---------- Controles ---------- */
+
+btnTalk.addEventListener('click', () => {
+  if (speaker.speaking || currentState === 'speaking') {
+    stopAll();
+    return;
+  }
+  const text = $('ttsText').value.trim();
+  if (!text) {
+    toast('Écris une phrase à lire.');
+    return;
+  }
+  const shortText = DEMO_REPLY.short;
+  const longText = DEMO_REPLY.long;
+  // Alterne court et long pour varier l'exercice de la maquette.
+  const cycle = (window.__mockTalkCount = (window.__mockTalkCount || 0) + 1);
+  const chosen = cycle % 3 === 0 ? longText : text || shortText;
+  $('ttsText').value = chosen;
+  speakText();});
+
+btnStop.addEventListener('click', stopAll);
+
+$('amp').addEventListener('input', (event) => {
+  const value = Number(event.target.value);
+  $('ampOut').textContent = value.toFixed(2);
+  if (avatar.viseme !== 'rest') avatar.setViseme(avatar.viseme, value);
+});
+
+$('rate').addEventListener('input', (event) => {
+  $('rateOut').textContent = Number(event.target.value).toFixed(2);
+});
+
+$('btnSpeak').addEventListener('click', speakText);
+
+$('btnPartition').addEventListener('click', () => {
+  stopAll();
+  setMic(false);
+  applyState('speaking');
+  const text = $('ttsText').value.trim() || DEMO_REPLY.long;
+  const script = buildVisemeScript(text, { rate: Number($('rate').value) || 1 });
+  $('dbgSync').textContent = 'partition';
+  $('dbgBoundary').textContent = String(script.length);
+  caption.textContent = 'Bouche seule : ' + script.length + ' événements visémiques, sans aucun son.';
+  player.play(script, () => {
+    applyState('idle');
+    $('dbgSync').textContent = 'idle';
+  }, (event, index) => {
+    caption.textContent = 'Bouche seule : ' + index + '/' + script.length + ' · ' + event.viseme;
+  });
+});
+
+let stressTimer = 0;
+$('btnStress').addEventListener('click', () => {
+  stopAll();
+  setMic(false);
+  clearInterval(stressTimer);
+  applyState('speaking');
+  const text = DEMO_REPLY.long + ' ' + DEMO_REPLY.long;
+  player.play(buildVisemeScript(text, { rate: 1.35 }), () => {
+    applyState('idle');
+    avatar.setEmotion('neutral', 0);
+  });
+  const emotions = ['neutral', 'happy', 'surprised', 'curious', 'sad'];
+  let step = 0;
+  stressTimer = setInterval(() => {
+    avatar.setEmotion(emotions[step % emotions.length], 0);
+    step += 1;
+  }, 1300);
+  setTimeout(() => {
+    clearInterval(stressTimer);
+    player.stop();
+    applyState('idle');
+    avatar.setEmotion('neutral', 0);
+  }, 8000);
+  toast('Stress : partition longue, humeurs changeantes.');
+});
+
+/* ---------- Boutons de demonstration ---------- */
+
+for (const state of AVATAR_STATES) {
+  const button = document.createElement('button');
+  button.className = 'pbtn' + (state === 'error' ? ' danger' : '');
+  button.textContent = LABELS[state];
+  button.dataset.state = state;
+  button.setAttribute('aria-pressed', String(state === 'idle'));
+  button.addEventListener('click', () => {
+    speaker.stop('demo', { silent: true });
+    player.stop();
+    applyState(state);
+    caption.classList.remove('muted');
+    caption.textContent = state === 'idle'
+      ? 'Appuie sur Parler : je te réponds à voix haute.'
+      : state === 'listening'
+        ? 'Je t\'écoute. (Démo : aucune capture micro.)'
+        : state === 'thinking'
+          ? 'Je réfléchis…'
+          : state === 'speaking'
+            ? 'Je parle, la bouche suit la partition.'
+            : 'Oups, je n\'ai pas réussi.';
+    if (state === 'listening') setMic(true);
+  });
+  stateButtons.set(state, button);
+  $('stateBtns').append(button);
+}
+
+for (const emotion of AVATAR_EMOTIONS) {
+  const button = document.createElement('button');
+  button.className = 'pbtn';
+  button.textContent = emotion;
+  button.setAttribute('aria-pressed', String(emotion === 'neutral'));
+  button.addEventListener('click', () => {
+    avatar.setEmotion(emotion, 0);
+    for (const [name, other] of emotionButtons) {
+      other.setAttribute('aria-pressed', String(name === emotion));
+    }
+    $('dbgState').textContent = currentState + ' · ' + emotion;
+  });
+  emotionButtons.set(emotion, button);
+  $('emoBtns').append(button);
+}
+
+for (const viseme of AVATAR_VISEMES) {
+  const button = document.createElement('button');
+  button.className = 'pbtn';
+  button.textContent = viseme;
+  button.setAttribute('aria-pressed', 'false');
+  button.addEventListener('click', () => {
+    speaker.stop('demo', { silent: true });
+    player.stop();
+    applyState('speaking');
+    const value = Number($('amp').value);
+    avatar.setViseme(viseme, value);
+    for (const [name, other] of visemeButtons) {
+      other.setAttribute('aria-pressed', String(name === viseme));
+    }
+    caption.textContent = 'Visème « ' + viseme + ' » à ' + value.toFixed(2) + ' d\'amplitude.';
+  });
+  visemeButtons.set(viseme, button);
+  $('visemeBtns').append(button);
+}
+
+/* ---------- Bascule Chat / Avatar ---------- */
+
+const modeSwitch = $('modeSwitch');
+const chatView = $('chatView');
+const avatarView = $('avatarView');
+
+function setMode(mode) {
+  modeSwitch.dataset.mode = mode;
+  for (const tab of modeSwitch.querySelectorAll('button')) {
+    tab.setAttribute('aria-selected', String(tab.dataset.mode === mode));
+  }
+  chatView.hidden = mode !== 'chat';
+  avatarView.hidden = mode !== 'avatar';
+  btnPanel.style.display = mode === 'avatar' ? '' : 'none';
+  avatar.setPaused(mode !== 'avatar');
+  if (mode !== 'avatar') {
+    speaker.stop('mode');
+    player.stop();
+    setMic(false);
+    if (currentState === 'speaking') applyState('idle');
+  }
+}
+
+modeSwitch.addEventListener('click', (event) => {
+  const tab = event.target.closest('button[data-mode]');
+  if (tab) setMode(tab.dataset.mode);
+});
+
+/* ---------- Chat de demonstration ---------- */
+
+const chatForm = $('chatForm');
+const chatInput = $('chatInput');
+const chatScroll = $('chatScroll');
+
+function appendBubble(role, text) {
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble ' + role;
+  bubble.textContent = text;
+  if (role === 'bot') {
+    const small = document.createElement('small');
+    small.textContent = 'Réponse de démonstration';
+    bubble.append(small);
+  }
+  chatScroll.append(bubble);
+  chatScroll.scrollTop = chatScroll.scrollHeight;
+}
+
+chatForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const text = chatInput.value.trim();
+  if (!text) return;
+  appendBubble('user', text);
+  chatInput.value = '';
+  chatInput.style.height = '';
+  setTimeout(() => {
+    appendBubble('bot', 'Ceci est une maquette : le vrai moteur répondra ici, puis la même réponse pourra être lue en mode Avatar.');
+  }, 420);
+});
+
+chatInput.addEventListener('input', () => {
+  chatInput.style.height = 'auto';
+  chatInput.style.height = Math.min(110, chatInput.scrollHeight) + 'px';
+});
+
+/* ---------- Panneau mobile ---------- */
+
+const panel = $('panel');
+const scrim = $('scrim');
+const btnPanel = $('btnPanel');
+
+function togglePanel(open) {
+  panel.classList.toggle('open', open);
+  scrim.classList.toggle('show', open);
+  btnPanel.setAttribute('aria-expanded', String(open));
+}
+
+btnPanel.addEventListener('click', () => togglePanel(!panel.classList.contains('open')));
+scrim.addEventListener('click', () => togglePanel(false));
+
+/* ---------- Toast ---------- */
+
+let toastTimer = 0;
+function toast(message) {
+  const element = $('toast');
+  element.textContent = message;
+  element.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => element.classList.remove('show'), 2400);
+}
+
+/* ---------- Diagnostic temps reel ---------- */
+
+let frames = 0;
+let fpsAt = performance.now();
+let lastFps = 0;
+function debugLoop(now) {
+  frames += 1;
+  if (now - fpsAt > 500) {
+    const fps = Math.round((frames * 1000) / (now - fpsAt));
+    lastFps = fps;
+    $('dbgFps').textContent = String(fps);
+    frames = 0;
+    fpsAt = now;
+  }
+  if (avatar.viseme !== $('dbgViseme').textContent) $('dbgViseme').textContent = avatar.viseme;
+  const sync = speaker.sync || 'idle';
+  if (sync !== $('dbgSync').textContent) $('dbgSync').textContent = sync;
+  requestAnimationFrame(debugLoop);
+}
+requestAnimationFrame(debugLoop);
+
+/* ---------- API de test ---------- */
+
+window.__mock = {
+  avatar,
+  speaker,
+  player,
+  applyState,
+  setMode,
+  setMic,
+  speakText,
+  stopAll,
+  togglePanel,
+  get state() { return currentState; },
+  get mic() { return micOn; },
+  get emotion() { return avatar.emotion; },
+  get viseme() { return avatar.viseme; },
+  get fps() { return lastFps; },
+  get reduced() { return avatar.reduced; },
+  get renderMode() { return avatar.reduced ? 'reduced' : 'full'; },
+  get blinkTimerActive() { return Boolean(avatar._blinkTimer); },
+};
+
+setMode('avatar');
+applyState('idle');
+if (location.hash === '#panel') togglePanel(true);
+setTimeout(() => avatar.setEmotion('happy', 1600), 700);
+</script>
+</body>
+</html>

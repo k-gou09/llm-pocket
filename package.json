@@ -1,0 +1,13 @@
+{
+  "name": "llm-pocket",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Chat IA local (PWA) - Qwen3.5 0.8B + vision, moteur wllama v3",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "@wllama/wllama": "^3.13.0"
+  }
+}

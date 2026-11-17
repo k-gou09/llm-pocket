@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LLM Pocket - Diagnostic moteur</title>
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      margin: 0 auto;
+      max-width: 720px;
+      padding: 16px;
+      background: #101418;
+      color: #d7dde3;
+      font: 14px/1.5 system-ui, sans-serif;
+    }
+    h1 { font-size: 18px; margin: 0 0 4px; }
+    h1 small { color: #7d8b99; font-weight: normal; }
+    h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: #7d8b99; margin: 18px 0 6px; }
+    button {
+      background: #1d6ae5; color: #fff; border: 0; border-radius: 8px;
+      padding: 10px 14px; font-size: 14px; cursor: pointer;
+    }
+    button:disabled { opacity: 0.4; cursor: default; }
+    button.secondary { background: #2a3340; }
+    #btnStop { background: #8b2c2c; }
+    input[type="text"] {
+      flex: 1; min-width: 180px; padding: 10px; border-radius: 8px;
+      border: 1px solid #2c3541; background: #171d24; color: inherit;
+    }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
+    #bar { height: 8px; background: #1b222a; border-radius: 4px; overflow: hidden; margin: 10px 0 4px; }
+    #fill { height: 100%; width: 0; background: #1d6ae5; transition: width 0.2s; }
+    #status { color: #9db2c5; margin: 4px 0; }
+    #env { color: #6d7c8a; font-size: 12px; font-family: ui-monospace, monospace; }
+    pre {
+      background: #171d24; border: 1px solid #232c36; border-radius: 8px;
+      padding: 12px; white-space: pre-wrap; word-break: break-word;
+      min-height: 40px; max-height: 340px; overflow: auto;
+      font-family: ui-monospace, monospace; font-size: 12.5px; margin: 0;
+    }
+    #preview { max-width: 100%; max-height: 220px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h1>LLM Pocket <small>- diagnostic moteur</small></h1>
+  <p id="env">...</p>
+
+  <div id="bar"><div id="fill"></div></div>
+  <p id="status">Pret.</p>
+
+  <div class="row">
+    <button id="btnLoad">1. Charger le modele</button>
+    <button id="btnStop" disabled>Stop</button>
+  </div>
+
+  <div class="row">
+    <input type="text" id="prompt" value="Dis bonjour en une phrase courte." />
+  </div>
+
+  <div class="row">
+    <button id="btnText" disabled>2. Generer (texte)</button>
+  </div>
+
+  <div class="row">
+    <input type="file" id="imgFile" accept="image/*" />
+    <button id="btnImage" disabled>3. Analyser l'image</button>
+  </div>
+  <img id="preview" alt="" hidden />
+
+  <h2>Sortie</h2>
+  <pre id="out"></pre>
+
+  <h2>Stats</h2>
+  <pre id="stats"></pre>
+
+  <script type="module" src="src/poc.js"></script>
+</body>
+</html>
