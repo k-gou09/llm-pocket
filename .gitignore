@@ -2,3 +2,4 @@ node_modules/
 model/
 *.gguf
 .DS_Store
+.serena/
