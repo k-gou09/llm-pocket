@@ -123,7 +123,7 @@ installée depuis GitHub Pages :
 | Chargement du moteur (CPU, 4 fils) | prêt à ~407 s après le clic |
 | Première réponse | ~30 à 40 s |
 | Démarrage à froid **hors ligne**, après redémarrage de la tablette | application ouverte en mode `standalone`, moteur prêt, aucune requête réseau |
-| Réponse hors ligne | « Bonjour ! 😊 » en ~55 s |
+| Réponse hors ligne | « Bonjour ! 😊 » en ~55 s, puis « La table est une table ! 😊 » en ~80 s |
 | Animation de l'avatar | 48 à 56 images/s (chute à ~17 pendant la génération) |
 
 `navigator.storage.persisted()` reste `false` sur cette tablette : le modèle peut donc
@@ -132,4 +132,13 @@ installée depuis GitHub Pages :
 ## Mise à jour
 
 Après modification d'un fichier précaché, incrémenter `CACHE` dans `sw.js`
-(`llm-pocket-v12` → `llm-pocket-v13`), sinon l'ancienne version reste servie hors ligne.
+(`llm-pocket-v13` → `llm-pocket-v14`), sinon l'ancienne version reste servie hors ligne.
+
+Le precache utilise `cache: 'reload'`. GitHub Pages sert ses fichiers avec
+`max-age=600` : un `cache.addAll()` simple peut recopier dans le nouveau cache une version
+encore présente dans le cache HTTP du navigateur (mesuré sur la tablette : le cache `v12`
+contenait le code d'avant la modification, alors que le serveur livrait la nouvelle version).
+
+Mesure sur la tablette, hors ligne : la dictée est refusée avec le message
+« Dictee indisponible hors ligne : la reconnaissance passe par le reseau. », le micro
+n'est pas ouvert, et l'avatar reste au repos.
