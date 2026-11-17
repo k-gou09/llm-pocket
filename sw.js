@@ -3,7 +3,7 @@
 // racine (serveur de dev) comme dans un sous-dossier (GitHub Pages /llm-pocket/).
 // Version du cache : a augmenter quand les fichiers de l'app changent, sinon le
 // navigateur peut servir une version ancienne des modules.
-const CACHE = 'llm-pocket-v12';
+const CACHE = 'llm-pocket-v13';
 
 const PRECACHE = [
   './',
@@ -106,7 +106,12 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
       .open(CACHE)
-      .then((cache) => cache.addAll(PRECACHE))
+      // 'reload' a la preparation : sans cela le cache du navigateur peut
+      // repondre avec une version agee (GitHub Pages sert max-age=600), et le
+      // nouveau cache hériterait d'une ancienne version des modules.
+      .then((cache) =>
+        Promise.all(PRECACHE.map((path) => fetch(new Request(path, { cache: 'reload' })).then((response) => cache.put(path, response))))
+      )
       .then(() => self.skipWaiting())
   );
 });
